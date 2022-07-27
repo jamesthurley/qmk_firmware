@@ -11,6 +11,10 @@ Updates from victorsavu3:
 
 # Instructions.
 
+QMK Docker docs: https://docs.qmk.fm/#/getting_started_docker
+
+ - Ensure you clone using `--recurse-submodules` option. If you clone without run `git submodule update --init --recursive`
+
  - In WSL, navigate to `~/dev/qmk_firmware`.
  - Run `util/docker_build.sh keychron/q1/rev_0102:jamesthurley`
  - Copy `keychron_q1_rev_0102_jamesthurley.hex` from `\\wsl.localhost\Ubuntu-20.04\home\james\dev\qmk_firmware` to `Dropbox\Dev\configs`
