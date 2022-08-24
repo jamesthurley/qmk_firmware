@@ -25,13 +25,17 @@ enum layers{
 
 enum custom_keycodes {
     KC_MISSION_CONTROL = SAFE_RANGE,
-    KC_LAUNCHPAD
+    KC_LAUNCHPAD,
+    VSC_FOCUS_EDITOR_RIGHT,
+    VSC_FOCUS_EDITOR_LEFT,
 };
 
 #define KC_TASK LGUI(KC_TAB)
 #define KC_FLXP LGUI(KC_E)
 #define KC_MCTL KC_MISSION_CONTROL
 #define KC_LPAD KC_LAUNCHPAD
+#define KC_VSER VSC_FOCUS_EDITOR_RIGHT
+#define KC_VSEL VSC_FOCUS_EDITOR_LEFT
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [MAC_BASE] = LAYOUT_iso_83(
@@ -47,7 +51,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_CAPS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,
         RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  KC_TRNS,  KC_HOME,  KC_UP,    KC_END,   KC_TRNS,  KC_TRNS,  KC_TRNS,                      KC_TRNS,
         KC_TRNS,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  KC_BSPC,  KC_LEFT,  KC_DOWN,  KC_RGHT,  KC_DEL,   KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,
-        KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,  KC_PGUP,
+        KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_VSEL,  KC_VSER,  KC_TRNS,            KC_TRNS,  KC_PGUP,
         KC_TRNS,  KC_TRNS,  KC_TRNS,                                KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_LEAD,  KC_HOME,  KC_PGDN,  KC_END),
 
     [WIN_BASE] = LAYOUT_iso_83(
@@ -63,11 +67,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_CAPS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,
         RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  KC_TRNS,  KC_HOME,  KC_UP,    KC_END,   KC_TRNS,  KC_TRNS,  KC_TRNS,                      KC_TRNS,
         KC_TRNS,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  KC_BSPC,  KC_LEFT,  KC_DOWN,  KC_RGHT,  KC_DEL,   KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,
-        KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,            KC_TRNS,  KC_PGUP,
+        KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_TRNS,  KC_VSEL,  KC_VSER,  KC_TRNS,            KC_TRNS,  KC_PGUP,
         KC_TRNS,  KC_TRNS,  KC_TRNS,                                KC_TRNS,                                KC_TRNS,  KC_TRNS,  KC_LEAD,  KC_HOME,  KC_PGDN,  KC_END)
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // Useful reference.
+    // https://getreuer.info/posts/keyboards/macros/index.html
+    const uint8_t mods = get_mods();
+    const uint8_t oneshot_mods = get_oneshot_mods();
+
     switch (keycode) {
         case KC_MISSION_CONTROL:
             if (record->event.pressed) {
@@ -82,6 +91,33 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             } else {
                 host_consumer_send(0);
             }
+            return false;  // Skip all further processing of this key
+        case VSC_FOCUS_EDITOR_RIGHT:
+        case VSC_FOCUS_EDITOR_LEFT:
+            clear_mods();  // Temporarily disable mods.
+            clear_oneshot_mods();
+
+            if (record->event.pressed) {
+                if ((mods | oneshot_mods) & MOD_MASK_SHIFT) {
+                    if (keycode == VSC_FOCUS_EDITOR_RIGHT) {
+                        SEND_STRING(SS_LCTL(SS_LALT(SS_TAP(X_RIGHT)))); // CTRL+ALT+RIGHT
+                    }
+                    else {
+                        SEND_STRING(SS_LCTL(SS_LALT(SS_TAP(X_LEFT)))); // CTRL+ALT+LEFT
+                    }
+                }
+                else {
+                    if (keycode == VSC_FOCUS_EDITOR_RIGHT) {
+                        SEND_STRING(SS_LCTL("k"SS_TAP(X_RIGHT))); // CTRL+K, CTRL+RIGHT
+                    }
+                    else {
+                        SEND_STRING(SS_LCTL("k"SS_TAP(X_LEFT))); // CTRL+K, CTRL+LEFT
+                    }
+                }
+            } else {
+            }
+            
+            set_mods(mods);  // Restore mods.
             return false;  // Skip all further processing of this key
         default:
             return true;  // Process all other keycodes normally
