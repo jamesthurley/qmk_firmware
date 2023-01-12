@@ -18,9 +18,9 @@ QMK Docker docs: https://docs.qmk.fm/#/getting_started_docker
  - In WSL, navigate to `~/dev/qmk_firmware`.
  - Run `util/docker_build.sh keychron/q1/rev_0102:jamesthurley`
  - Copy `keychron_q1_rev_0102_jamesthurley.hex` from `\\wsl.localhost\Ubuntu-20.04\home\james\dev\qmk_firmware` to `Dropbox\Dev\configs`
- - Run QMK Toolbox
+ - Run QMK Toolbox - sometimes takes a whiel to start. Often in `c:\dev\tools\qmk_toolbox.exe`.
  - Select hex file.
  - Unplug keyboard, remove spacebar, hold down reset button and plug back in.
- - QMK will say "device connected".
+ - QMK will say "device connected", after maybe 15 seconds.
  - Flash.
  - Done.
